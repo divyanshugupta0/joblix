@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Automo - Automated Task Scheduler with Firebase">
-    <title>Automo | Automated Task Scheduler</title>
+    <meta name="description" content="Joblix - Automated Task Scheduler with Firebase">
+    <title>Joblix | Automated Task Scheduler</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -17,7 +17,7 @@
     <div class="auth-container" id="auth-container">
         <div class="auth-bg"></div>
         <div class="auth-box">
-            <div class="auth-logo">⏰ Automo</div>
+            <div class="auth-logo">⏰ Joblix</div>
             <p class="auth-subtitle">Automated task scheduler that works while you sleep</p>
 
             <div class="auth-tabs">
@@ -83,12 +83,23 @@
     <!-- Main App -->
     <div class="app hidden" id="app">
         <aside class="sidebar" id="sidebar">
-            <div class="logo">⏰ <span>Automo</span></div>
+            <div class="logo">
+                <i data-lucide="zap" style="width: 24px; height: 24px; color: var(--primary);"></i>
+                <span>Joblix</span>
+            </div>
             <nav class="nav">
-                <a href="#" class="nav-item active" data-section="dashboard">📊 Dashboard</a>
-                <a href="#" class="nav-item" data-section="tasks">✅ Tasks</a>
-                <a href="#" class="nav-item" data-section="logs">📋 Logs</a>
-                <a href="#" class="nav-item" data-section="settings">⚙️ Settings</a>
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i data-lucide="layout-dashboard" class="icon-sm"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-section="tasks">
+                    <i data-lucide="check-square" class="icon-sm"></i> Tasks
+                </a>
+                <a href="#" class="nav-item" data-section="logs">
+                    <i data-lucide="file-text" class="icon-sm"></i> Logs
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i data-lucide="settings" class="icon-sm"></i> Settings
+                </a>
             </nav>
             <div class="user-info" id="user-info">
                 <div class="user-avatar" id="user-avatar">U</div>

@@ -1,7 +1,7 @@
 {
-    "name": "automo",
+    "name": "joblix",
     "version": "1.0.0",
-    "description": "automo - Automated Task Scheduler",
+    "description": "joblix - Automated Task Scheduler",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",

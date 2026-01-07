@@ -1,4 +1,4 @@
-# Automo - Automated Task Scheduler
+# Joblix - Automated Task Scheduler
 
 **Tasks run automatically without opening any browser!**
 
@@ -31,10 +31,10 @@ backend/
 
 ## 🔧 Setup Instructions
 
-### Step 1: Create Firebase Project (for Automo itself)
+### Step 1: Create Firebase Project (for Joblix itself)
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Create a new project called "Automo" (or any name)
+2. Create a new project called "Joblix" (or any name)
 3. Enable **Authentication** → Email/Password
 4. Enable **Realtime Database**
 5. Set database rules:
@@ -76,7 +76,7 @@ const FIREBASE_CONFIG = {
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
 5. Add Environment Variables:
-   - `FIREBASE_DATABASE_URL` = Your Automo Firebase DB URL
+   - `FIREBASE_DATABASE_URL` = Your Joblix Firebase DB URL
    - `FIREBASE_SERVICE_ACCOUNT` = Paste the entire service account JSON
    - `TIMEZONE` = `Asia/Kolkata` (or your timezone)
 6. Deploy!
@@ -137,8 +137,8 @@ Your site will be live at `https://your-app.onrender.com`
 
 Render free tier spins down after 15 mins of inactivity.
 
-**Solution:** Create a Simple Cron task that pings YOUR OWN Automo URL every 10 minutes!
-This keeps Automo itself alive 24/7.
+**Solution:** Create a Simple Cron task that pings YOUR OWN Joblix URL every 10 minutes!
+This keeps Joblix itself alive 24/7.
 
 ## 🛡️ Security
 

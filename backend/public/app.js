@@ -1,4 +1,4 @@
-// Automo - Automated Task Scheduler
+// Joblix - Automated Task Scheduler
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBqD1J3iduH0QFAtE9utQBNc3ukRFwQz1M",
     authDomain: "cronify-4dcee.firebaseapp.com",
@@ -18,7 +18,7 @@ const PRICING = {
     CREDITS_PER_PURCHASE: 2000    // 2000 runs per ₹20
 };
 
-class Automo {
+class Joblix {
     constructor() {
         this.user = null;
         this.db = null;
@@ -638,4 +638,4 @@ class Automo {
 }
 
 // Initialize
-const app = new Automo();
+const app = new Joblix();
