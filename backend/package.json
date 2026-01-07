@@ -1,7 +1,7 @@
 {
-    "name": "cronify",
+    "name": "automo",
     "version": "1.0.0",
-    "description": "Cronify - Automated Task Scheduler",
+    "description": "automo - Automated Task Scheduler",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",

@@ -15,7 +15,7 @@ app.use(express.json({ limit: '10mb' }));
 // Serve static files (frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize Firebase Admin (for Cronify's own database)
+// Initialize Firebase Admin (for Automo's own database)
 let db;
 function initFirebase() {
     try {
@@ -41,7 +41,7 @@ const activeJobs = new Map();
 app.get('/api/status', (req, res) => {
     res.json({
         status: 'running',
-        service: 'Cronify',
+        service: 'Automo',
         activeJobs: activeJobs.size,
         time: new Date().toISOString()
     });
@@ -327,7 +327,7 @@ app.get('*', (req, res) => {
 
 // Start server
 app.listen(PORT, async () => {
-    console.log(`🚀 Cronify running on port ${PORT}`);
+    console.log(`🚀 Automo running on port ${PORT}`);
     console.log(`📍 http://localhost:${PORT}`);
     await loadAllTasks();
     watchTaskChanges();
