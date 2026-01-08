@@ -265,59 +265,94 @@ function cancelJob(jobKey) {
     }
 }
 
-// Load all tasks on startup
-async function loadAllTasks() {
-    console.log('Loading all user tasks...');
-    try {
-        const usersSnap = await db.ref('users').once('value');
-        const users = usersSnap.val() || {};
+// =========== WATCHERS & SCHEDULING SYSTEM ===========
 
-        let count = 0;
-        for (const [userId, userData] of Object.entries(users)) {
-            const tasks = userData.tasks || {};
-            for (const [taskId, task] of Object.entries(tasks)) {
-                if (task.enabled) {
-                    scheduleTask(userId, task);
-                    count++;
+const userTaskListeners = new Map(); // Track listeners to detach them if user is deleted
+
+function initTaskSystem() {
+    console.log('🚀 Initializing Task System...');
+
+    // 1. Listen for new or existing users (child_added fires for existing data too)
+    // We only access the key to avoid downloading the internal data if possible,
+    // though Firebase SDK might still prefetch. But we DON'T map the whole object.
+    db.ref('users').on('child_added', (snapshot) => {
+        const userId = snapshot.key;
+        setupUserTaskWatcher(userId);
+    });
+
+    // 2. Handle user deletion
+    db.ref('users').on('child_removed', (snapshot) => {
+        const userId = snapshot.key;
+        cleanupUserTasks(userId);
+    });
+}
+
+function setupUserTaskWatcher(userId) {
+    if (userTaskListeners.has(userId)) return;
+
+    // Listen ONLY to the 'tasks' node of the user.
+    // This is CRITICAL: We avoid listening to 'users/{userId}' which contains 'logs'.
+    // Logs update frequently and can be huge, causing OOM if we listen to the parent.
+    const tasksRef = db.ref(`users/${userId}/tasks`);
+
+    // We use 'value' to sync the tasks state. tasks list is generally small.
+    const listener = tasksRef.on('value', (snapshot) => {
+        const tasks = snapshot.val() || {};
+
+        // reconcile jobs for this user
+        const currentTaskIds = new Set();
+
+        for (const [taskId, task] of Object.entries(tasks)) {
+            currentTaskIds.add(taskId);
+
+            // Only schedule if enabled
+            if (task.enabled) {
+                // Optimization: scheduleTask cancels existing job first, so this handles updates
+                // Note: updating runCount/lastRun will trigger this. 
+                // Ideally we should check if schedule/config changed, but scheduling is cheap enough here compared to OOM.
+                scheduleTask(userId, task);
+            } else {
+                const jobKey = `${userId}_${task.id}`;
+                cancelJob(jobKey);
+            }
+        }
+
+        // Cleanup jobs for tasks that were deleted/removed from this snapshot
+        // We verify against activeJobs for this user
+        for (const [jobKey] of activeJobs) {
+            if (jobKey.startsWith(`${userId}_`)) {
+                const parts = jobKey.split('_');
+                // userId is parts[0], taskId is parts[1] (or rest if id has underscore?)
+                // Assuming simple ids. task.id usually pushId.
+                const jobTaskId = parts[1];
+
+                // If this job belongs to this user AND the task is no longer in the fetched tasks list
+                if (parts[0] === userId && !currentTaskIds.has(jobTaskId)) {
+                    cancelJob(jobKey);
                 }
             }
         }
-        console.log(`✅ Loaded ${count} active tasks`);
-    } catch (e) {
-        console.error('Error loading tasks:', e);
-    }
+    });
+
+    userTaskListeners.set(userId, { ref: tasksRef, listener });
+    // console.log(`Listener attached for user: ${userId}`);
 }
 
-// Watch for task changes in real-time
-function watchTaskChanges() {
-    db.ref('users').on('child_changed', async (snap) => {
-        const userId = snap.key;
-        const userData = snap.val() || {};
-        const tasks = userData.tasks || {};
+function cleanupUserTasks(userId) {
+    // Detach Firebase listener
+    if (userTaskListeners.has(userId)) {
+        const { ref, listener } = userTaskListeners.get(userId);
+        ref.off('value', listener);
+        userTaskListeners.delete(userId);
+    }
 
-        // Update scheduled jobs for this user
-        for (const [taskId, task] of Object.entries(tasks)) {
-            const jobKey = `${userId}_${taskId}`;
-            if (task.enabled) {
-                scheduleTask(userId, task);
-            } else {
-                cancelJob(jobKey);
-            }
+    // Stop all cron jobs for this user
+    for (const [jobKey] of activeJobs) {
+        if (jobKey.startsWith(`${userId}_`)) {
+            cancelJob(jobKey);
         }
-    });
-
-    // Handle deleted users/tasks
-    db.ref('users').on('child_removed', (snap) => {
-        const userId = snap.key;
-        // Cancel all jobs for this user
-        for (const [jobKey] of activeJobs) {
-            if (jobKey.startsWith(`${userId}_`)) {
-                cancelJob(jobKey);
-            }
-        }
-    });
-
-    console.log('👀 Watching for task changes...');
+    }
+    console.log(`Cleaned up user: ${userId}`);
 }
 
 // Serve frontend for all other routes
@@ -329,6 +364,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, async () => {
     console.log(`🚀 Joblix running on port ${PORT}`);
     console.log(`📍 http://localhost:${PORT}`);
-    await loadAllTasks();
-    watchTaskChanges();
+    initTaskSystem();
 });
